@@ -1,0 +1,21 @@
+{
+  "name": "battleship-api",
+  "version": "1.0.0",
+  "description": "An API for a one-way game of battleships where one player always defends and the other always attacks.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "test": "mocha"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server": "^2.4.8",
+    "express": "^4.16.4",
+    "graphql": "^14.2.1",
+    "mocha": "^6.1.4",
+    "mongoose": "^5.5.2",
+    "typescript": "^3.4.4"
+  }
+}
