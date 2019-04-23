@@ -40,12 +40,13 @@ export interface IShip extends Document {
   longitude: number;
 }
 
-export const ShipModel = mongoose.model<IShip>('ShipModel', ShipSchema);
+export const ShipModel = mongoose.model<IShip>('Ship', ShipSchema);
 
 export const ShotSchema = new Schema(
   {
     latitude: { type: Number, required: true },
-    longitude: { type: Number, required: true }
+    longitude: { type: Number, required: true },
+    hit: { type: Schema.Types.ObjectId, ref: 'Ship' }
   },
   {
     timestamps: true
@@ -57,4 +58,4 @@ export interface IShot extends Document {
   longitude: number;
 }
 
-export const ShotModel = mongoose.model<IShot>('ShotModel', ShotSchema);
+export const ShotModel = mongoose.model<IShot>('Shot', ShotSchema);

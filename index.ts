@@ -8,12 +8,21 @@ const app = express();
 app.get('/api/attack/:latitude/:longitude', async function(req, res) {
   const { latitude, longitude } = req.params;
   try {
-    let isHit = await ShotRepository.instance().create(latitude, longitude);
-    if (isHit === true) {
-      res.send('HIT');
+    let response = await ShotRepository.instance().create(latitude, longitude);
+    res.send(response);
+    /*if (isHit === true) {
+      //TODO: If we sank a ship we have to provide this as feedback
+      // - ALSO if we sank ALL ships we should say this
+      /*
+        - “You just sank the ...”​ following with the ship-type. when the ship has been sunk (all squares
+        of that ship got hit).
+        - “Game over”​ with a numbers of shots were required​ and missed shots​ from the beginning
+        of the game until game over.
+      /
+      res.send('Hit');
     } else {
-      res.send('MISS');
-    }
+      res.send('Miss');
+    }*/
   } catch (err) {
     if (err instanceof AuthorizationError) {
       res.status(401);

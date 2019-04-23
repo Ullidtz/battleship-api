@@ -44,6 +44,19 @@ export const didShotHit = (
   return false;
 };
 
+export const getShipFromShot = (
+  latitude: number,
+  longitude: number,
+  ships: [IShip]
+): IShip | null => {
+  for (let ship of ships) {
+    if (doesPointIntersectWithShip(Number(latitude), Number(longitude), ship)) {
+      return ship;
+    }
+  }
+  return null;
+};
+
 export const doesPointIntersectWithShip = (
   latitude: number,
   longitude: number,
