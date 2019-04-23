@@ -1,6 +1,6 @@
 import { ShipRepository, ShotRepository } from './repositories';
 import { getShipLengthFromType, didShotHit } from './utilities';
-import { ShipType, ShipOrientation, IShip, IShot } from './schemas';
+import { IShip, IShot } from './schemas';
 import AuthorizationError from './AuthorizationError';
 import express from 'express';
 const app = express();

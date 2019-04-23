@@ -1,4 +1,4 @@
-import { ShipType, IShip, ShipModel } from './schemas';
+import { ShipType, IShip } from './schemas';
 
 export const areCoordinatesWithinGrid = (
   latitude: number,
@@ -11,11 +11,11 @@ export const getShipLengthFromType = (type: ShipType): number => {
   switch (type) {
     case ShipType.Battleship:
       return 4;
-    case 'cruiser': //TODO : Finish this
+    case ShipType.Cruiser:
       return 3;
-    case 'destroyer':
+    case ShipType.Destroyer:
       return 2;
-    case 'submarine':
+    case ShipType.Submarine:
       return 1;
     default:
       throw new Error('Unknown ship type');
@@ -38,10 +38,6 @@ export const didShotHit = (
 ): boolean => {
   for (let ship of ships) {
     if (doesPointIntersectWithShip(Number(latitude), Number(longitude), ship)) {
-      console.log(
-        'You stupid computer thinking this is a hit when its not... ship:',
-        ship
-      );
       return true;
     }
   }
