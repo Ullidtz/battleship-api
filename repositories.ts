@@ -1,28 +1,31 @@
-const { Ship, Shot } = require('./database');
-const {
+import { Ship, Shot } from './database';
+import { ShipType, ShipOrientation, IShip } from './schemas';
+import {
   areCoordinatesWithinGrid,
   doesShipFitInsideGrid,
   didShotHit,
   doShipsIntersectOrTouch
-} = require('./utilities');
-const AuthorizationError = require('./AuthorizationError');
+} from './utilities';
+import AuthorizationError from './AuthorizationError';
 
 //TODO:
-// - TypeScript;
 // - Mocha tests
 
-class Repository {
+export class ShipRepository {
   static instance() {
     return new this();
   }
-}
 
-class ShipRepository extends Repository {
   get() {
     return Ship.find();
   }
 
-  async create(latitude, longitude, type, orientation) {
+  async create(
+    latitude: number,
+    longitude: number,
+    type: ShipType,
+    orientation: ShipOrientation
+  ) {
     //Verify coordinates to ensure they are within the grid.
     if (!areCoordinatesWithinGrid(latitude, longitude)) {
       throw new Error(
@@ -36,21 +39,21 @@ class ShipRepository extends Repository {
         longitude,
         type,
         orientation
-      })
+      } as IShip)
     ) {
       throw new Error('Ship does not fit inside grid');
     }
 
-    const ships = await this.get();
+    const ships: [IShip] = (await this.get()) as [IShip];
     //Make sure the ship type is available
     switch (type) {
       case 'battleship':
-        if (ships.filter(o => o.type === 'battleship').length >= 1) {
+        if (ships.filter(o => o.type === ShipType.Battleship).length >= 1) {
           throw new Error('All battleships have already been deployed.');
         }
         break;
       case 'cruiser':
-        if (ships.filter(o => o.type === 'cruiser').length >= 2) {
+        if (ships.filter(o => o.type === ShipType.Cruiser).length >= 2) {
           throw new Error('All cruisers have already been deployed.');
         }
         break;
@@ -76,7 +79,7 @@ class ShipRepository extends Repository {
           longitude,
           type,
           orientation
-        })
+        } as IShip)
       ) {
         throw new Error(
           'Illagal ship placement, intersecting or touching another ship'
@@ -93,12 +96,16 @@ class ShipRepository extends Repository {
   }
 }
 
-class ShotRepository extends Repository {
+export class ShotRepository {
+  static instance() {
+    return new this();
+  }
+
   get() {
     return Shot.find();
   }
 
-  async create(latitude, longitude) {
+  async create(latitude: number, longitude: number) {
     //Make sure all ships have been placed.
     let ships = await ShipRepository.instance().get();
     if (ships.length < 9) {
@@ -119,12 +126,10 @@ class ShotRepository extends Repository {
     }
 
     let shot = await Shot.create({ latitude, longitude });
-    return didShotHit(latitude, longitude, ships);
+    return didShotHit(latitude, longitude, ships as [IShip]);
   }
 
   reset() {
     return Shot.deleteMany({});
   }
 }
-
-module.exports = { ShipRepository, ShotRepository };

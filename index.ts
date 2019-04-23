@@ -1,7 +1,8 @@
-const { ShipRepository, ShotRepository } = require('./repositories');
-const { getShipLengthFromType, didShotHit } = require('./utilities');
-const AuthorizationError = require('./AuthorizationError');
-const express = require('express');
+import { ShipRepository, ShotRepository } from './repositories';
+import { getShipLengthFromType, didShotHit } from './utilities';
+import { ShipType, ShipOrientation, IShip, IShot } from './schemas';
+import AuthorizationError from './AuthorizationError';
+import express from 'express';
 const app = express();
 
 app.get('/attack/:latitude/:longitude', async function(req, res) {
@@ -53,7 +54,7 @@ app.get('/reset', async function(req, res) {
 });
 
 app.get('/', async function(req, res) {
-  let ships = await ShipRepository.instance().get();
+  let ships = (await ShipRepository.instance().get()) as [IShip];
   let shipString = '';
   for (let ship of ships) {
     shipString += `<li>[${ship.latitude},${ship.longitude}]: ${ship.type} (${
@@ -62,7 +63,7 @@ app.get('/', async function(req, res) {
   }
   shipString = `<h3>Ships:</h3><ul>${shipString}</ul>`;
 
-  let shots = await ShotRepository.instance().get();
+  let shots = (await ShotRepository.instance().get()) as [IShot];
   let shotString = '';
   for (let shot of shots) {
     let isHit = didShotHit(shot.latitude, shot.longitude, ships);
@@ -106,7 +107,7 @@ app.get('/', async function(req, res) {
   res.send(map + shipString + shotString);
 });
 
-const getColorFromNumber = number => {
+const getColorFromNumber = (number: number) => {
   switch (number) {
     case 0:
       return 'white';

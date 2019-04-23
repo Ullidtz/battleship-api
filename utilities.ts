@@ -1,12 +1,17 @@
-const areCoordinatesWithinGrid = (latitude, longitude) => {
+import { ShipType, IShip, ShipModel } from './schemas';
+
+export const areCoordinatesWithinGrid = (
+  latitude: number,
+  longitude: number
+): boolean => {
   return longitude >= 0 && latitude >= 0 && longitude < 10 && latitude < 10;
 };
 
-const getShipLengthFromType = type => {
+export const getShipLengthFromType = (type: ShipType): number => {
   switch (type) {
-    case 'battleship':
+    case ShipType.Battleship:
       return 4;
-    case 'cruiser':
+    case 'cruiser': //TODO : Finish this
       return 3;
     case 'destroyer':
       return 2;
@@ -17,7 +22,7 @@ const getShipLengthFromType = type => {
   }
 };
 
-const doesShipFitInsideGrid = ship => {
+export const doesShipFitInsideGrid = (ship: IShip): boolean => {
   let length = getShipLengthFromType(ship.type);
   if (ship.orientation === 'vertical') {
     return Number(ship.latitude) + length < 10;
@@ -26,7 +31,11 @@ const doesShipFitInsideGrid = ship => {
   }
 };
 
-const didShotHit = (latitude, longitude, ships) => {
+export const didShotHit = (
+  latitude: number,
+  longitude: number,
+  ships: [IShip]
+): boolean => {
   for (let ship of ships) {
     if (doesPointIntersectWithShip(Number(latitude), Number(longitude), ship)) {
       console.log(
@@ -39,12 +48,12 @@ const didShotHit = (latitude, longitude, ships) => {
   return false;
 };
 
-const doesPointIntersectWithShip = (
-  latitude,
-  longitude,
-  ship,
-  bufferZone = 0
-) => {
+export const doesPointIntersectWithShip = (
+  latitude: number,
+  longitude: number,
+  ship: IShip,
+  bufferZone: number = 0
+): boolean => {
   let shipLength = getShipLengthFromType(ship.type);
   if (ship.orientation === 'vertical') {
     let long = ship.longitude;
@@ -78,7 +87,7 @@ const doesPointIntersectWithShip = (
   return false;
 };
 
-const doShipsIntersectOrTouch = (lhs, rhs) => {
+export const doShipsIntersectOrTouch = (lhs: IShip, rhs: IShip) => {
   let lhsLength = getShipLengthFromType(lhs.type);
 
   if (lhs.orientation === 'vertical') {
@@ -98,13 +107,4 @@ const doShipsIntersectOrTouch = (lhs, rhs) => {
   }
 
   return false;
-};
-
-module.exports = {
-  areCoordinatesWithinGrid,
-  getShipLengthFromType,
-  doesShipFitInsideGrid,
-  didShotHit,
-  doesPointIntersectWithShip,
-  doShipsIntersectOrTouch
 };
