@@ -13,7 +13,6 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-// --/ <reference path='function-name.d.ts'/>
 var AuthorizationError = /** @class */ (function (_super) {
     __extends(AuthorizationError, _super);
     function AuthorizationError(message) {
