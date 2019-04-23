@@ -6,7 +6,7 @@ const ShipSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ['battleship', 'cruizer', 'destroyer', 'submarine']
+      enum: ['battleship', 'cruiser', 'destroyer', 'submarine']
     },
     orientation: {
       type: String,
