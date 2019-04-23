@@ -5,7 +5,7 @@ import AuthorizationError from './AuthorizationError';
 import express from 'express';
 const app = express();
 
-app.get('/attack/:latitude/:longitude', async function(req, res) {
+app.get('/api/attack/:latitude/:longitude', async function(req, res) {
   const { latitude, longitude } = req.params;
   try {
     let isHit = await ShotRepository.instance().create(latitude, longitude);
@@ -24,7 +24,7 @@ app.get('/attack/:latitude/:longitude', async function(req, res) {
   }
 });
 
-app.get('/ship/:latitude/:longitude/:type/:orientation', async function(
+app.get('/api/ship/:latitude/:longitude/:type/:orientation', async function(
   req,
   res
 ) {
@@ -47,13 +47,13 @@ app.get('/ship/:latitude/:longitude/:type/:orientation', async function(
   }
 });
 
-app.get('/reset', async function(req, res) {
+app.get('/api/reset', async function(req, res) {
   await ShipRepository.instance().reset();
   await ShotRepository.instance().reset();
   res.send('reset successfully');
 });
 
-app.get('/', async function(req, res) {
+app.get('/api/', async function(req, res) {
   let ships = (await ShipRepository.instance().get()) as [IShip];
   let shipString = '';
   for (let ship of ships) {
