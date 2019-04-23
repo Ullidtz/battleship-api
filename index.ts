@@ -102,8 +102,8 @@ app.get('/', async function(req, res) {
     }
     rows = `<tr>${row}</tr>` + rows; //Note these are added in reverse order to ensure latitude points north
   }
-  let map = `<table style="border:solid;">${rows}</table>`;
 
+  let map = `<table style="border:solid;">${rows}</table>`;
   res.send(map + shipString + shotString);
 });
 
