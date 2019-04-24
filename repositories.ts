@@ -100,7 +100,7 @@ export class ShotRepository {
   }
 
   get() {
-    return Shot.find();
+    return Shot.find().populate('hit');
   }
 
   async create(latitude: number, longitude: number) {
@@ -123,35 +123,46 @@ export class ShotRepository {
       throw new Error('A shot has already been fired at this location.');
     }
 
-    let shot = await Shot.create({ latitude, longitude });
     let ship = getShipFromShot(latitude, longitude, ships as [IShip]);
     if (ship === null) {
+      let shot = await Shot.create({ latitude, longitude });
       return 'Miss';
     }
 
-    let allShots = (await Shot.find({})) as [IShip];
-    let sankShip = isShipSunk(ship, allShots);
-    if (sankShip) {
-      for (let shipIt of ships) {
-        if (
-          ship.latitude === shipIt.latitude &&
-          ship.longitude === shipIt.longitude
-        ) {
-          continue;
-        }
-
-        let sunk = isShipSunk(shipIt, allShots);
-        if (!sunk) {
-          return `You just sank the ${ship.type}`;
-        }
-      }
-
-      //Consider: Since this only happens once at the end of the game it may not be worth saving hit status in DB.
-      // - But it is rather useful to have it, we could even do a count to see how many times a ship has been hit, telling us if it sunk....
-      // It's possible to recheck here, but the other solution seems better in the long run. (The hit status of a shot can't change after it's been fired either, there should be no loss of data integrity)
-      return `Game over. ${allShots.length} shots fired. ${allShots.filter(o => o.)} shots missed`; //TODO: It seems storing the hit status may be a good advantage here, and while it can be deduced from toher data, it is also available at the moment of creation and storing it will save us queries.)
+    let allShots = (await Shot.find({})) as [IShot];
+    let deadlyShots = allShots.filter(o => o.didSinkShip);
+    if (deadlyShots.length >= 10) {
+      return `There's no sense beating a dead battleship.`;
     }
 
+    let shotsHitThisShip = allShots.filter(
+      o => ship && o.hit && o.hit.toString() === ship._id.toString()
+    );
+    let shipLength = getShipLengthFromType(ship.type);
+    let sankShip = shotsHitThisShip.length + 1 === shipLength;
+    if (sankShip) {
+      if (deadlyShots.length < 9) {
+        let shot = await Shot.create({
+          latitude,
+          longitude,
+          hit: ship._id,
+          sankShip: true
+        });
+        return `You just sank the ${ship.type}`;
+      } else {
+        let shot = await Shot.create({
+          latitude,
+          longitude,
+          hit: ship._id,
+          sankShip: true
+        });
+        return `You just sank the ${ship.type}. Game over. ${
+          allShots.length
+        } shots fired. ${allShots.length - 20} shots missed`;
+      }
+    }
+
+    let shot = await Shot.create({ latitude, longitude, hit: ship._id });
     return 'Hit';
   }
 
@@ -159,28 +170,3 @@ export class ShotRepository {
     return Shot.deleteMany({});
   }
 }
-
-const isShipSunk = (ship: IShip, shots: [IShot]) => {
-  let sankShip = true;
-  let length = getShipLengthFromType(ship.type);
-  if (ship.orientation === ShipOrientation.Horizontal) {
-    for (let i = ship.longitude; i < ship.longitude + length; i++) {
-      let foundHit = shots.filter(
-        o => o.latitude === ship.latitude && o.longitude === i
-      );
-      if (!foundHit) {
-        sankShip = false;
-      }
-    }
-  } else {
-    for (let i = ship.latitude; i < ship.latitude + length; i++) {
-      let foundHit = shots.filter(
-        o => o.longitude === ship.longitude && o.latitude === i
-      );
-      if (!foundHit) {
-        sankShip = false;
-      }
-    }
-  }
-  return sankShip;
-};

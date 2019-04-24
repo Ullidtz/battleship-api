@@ -1,5 +1,5 @@
 import { ShipRepository, ShotRepository } from './repositories';
-import { getShipLengthFromType, didShotHit } from './utilities';
+import { getShipLengthFromType } from './utilities';
 import { IShip, IShot } from './schemas';
 import AuthorizationError from './AuthorizationError';
 import express from 'express';
@@ -10,19 +10,6 @@ app.get('/api/attack/:latitude/:longitude', async function(req, res) {
   try {
     let response = await ShotRepository.instance().create(latitude, longitude);
     res.send(response);
-    /*if (isHit === true) {
-      //TODO: If we sank a ship we have to provide this as feedback
-      // - ALSO if we sank ALL ships we should say this
-      /*
-        - “You just sank the ...”​ following with the ship-type. when the ship has been sunk (all squares
-        of that ship got hit).
-        - “Game over”​ with a numbers of shots were required​ and missed shots​ from the beginning
-        of the game until game over.
-      /
-      res.send('Hit');
-    } else {
-      res.send('Miss');
-    }*/
   } catch (err) {
     if (err instanceof AuthorizationError) {
       res.status(401);
@@ -75,10 +62,25 @@ app.get('/api/', async function(req, res) {
   let shots = (await ShotRepository.instance().get()) as [IShot];
   let shotString = '';
   for (let shot of shots) {
-    let isHit = didShotHit(shot.latitude, shot.longitude, ships);
-    shotString += `<li>[${shot.latitude},${shot.longitude}]: ${
-      isHit ? 'HIT' : 'MISS'
-    }</li>`;
+    if (shot.hit) {
+      let length = getShipLengthFromType(shot.hit.type);
+      let priorHits = shots.filter(
+        o =>
+          o.hit &&
+          shot.hit &&
+          o.hit._id === shot.hit._id &&
+          o.createdAt < shot.createdAt
+      );
+      if (priorHits.length + 1 === length) {
+        shotString += `<li>[${shot.latitude},${
+          shot.longitude
+        }]: Hit - You just sank the ${shot.hit.type}</li>`;
+      } else {
+        shotString += `<li>[${shot.latitude},${shot.longitude}]: Hit</li>`;
+      }
+    } else {
+      shotString += `<li>[${shot.latitude},${shot.longitude}]: Miss</li>`;
+    }
   }
   shotString = `<h3>Shots:</h3><ul>${shotString}</ul>`;
 
@@ -95,7 +97,7 @@ app.get('/api/', async function(req, res) {
   }
 
   for (let shot of shots) {
-    if (didShotHit(shot.latitude, shot.longitude, ships)) {
+    if (shot.hit) {
       grid[shot.latitude][shot.longitude] = 3;
     } else {
       grid[shot.latitude][shot.longitude] = 2;
