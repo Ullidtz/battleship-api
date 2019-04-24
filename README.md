@@ -7,7 +7,8 @@ An API for a one-way game of battleships where one player always defends and the
 This was described as being present for debug purposes.  
 So for my own sake I made this more graphical.  
 The 10x10 grid will show on top. (White is watter, Black is ships, Green is a miss, Red is a hit)  
-After this the ships and shots are listed as bullets.
+The lower left point is [0,0] and latitude and logitude work the way they would on a real map.
+After the grid the ships and shots are listed as bullets.
 
 ## api/reset
 
